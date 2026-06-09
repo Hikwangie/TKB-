@@ -2,10 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thời Khóa Biểu Điện Tử (App)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CẤU HÌNH ĐỂ ẨN THANH CÔNG CỤ (CHẠY FULL MÀN HÌNH NHƯ APP TẢI VỀ) -->
+    <!-- Android / Chrome -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f0c29">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+
+    <!-- iOS / Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TKB Tiêu Điểm">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <!-- INLINE PWA MANIFEST (ÉP ĐIỆN THOẠI KHÔNG HIỆN KHUNG TRÌNH DUYỆT) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Thời Khóa Biểu Tiêu Điểm","short_name":"TKB Tiêu Điểm","start_url":".","display":"standalone","background_color":"#0f0c29","theme_color":"#0f0c29","icons":[{"src":"icon.png","sizes":"192x192","type":"image/png"},{"src":"icon.png","sizes":"512x512","type":"image/png"}]}'>
+
     <style>
         :root {
             --primary: #a855f7;
@@ -300,7 +317,7 @@
         </div>
 
         <div id="schedule-list" class="pb-10">
-            </div>
+        </div>
 
         <div class="flex justify-center pb-10 mt-8">
             <button onclick="endDay()" class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl font-bold text-white text-lg shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(236,72,153,0.6)] hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-white/20">
@@ -319,6 +336,7 @@
 
     </div>
 
+    <!-- Script Xử Lý Logic Lưu Trữ 100% LocalStorage -->
     <script>
         // --- DỮ LIỆU THỜI KHÓA BIỂU ---
         const getMonSatSchedule = (diffSubject) => [
@@ -382,7 +400,7 @@
             "Những mục tiêu lớn cần một sức khoẻ bền bỉ. Máy móc còn cần sạc pin, ngần ngại gì mà không nghỉ ngơi sớm thôi nào!"
         ];
 
-        // --- TRẠNG THÁIỨNG DỤNG ---
+        // --- TRẠNG THÁI ỨNG DỤNG ---
         let currentDayKey = null;
         let currentTasks = [];
         let completedCount = 0;
