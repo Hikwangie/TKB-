@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thời Khóa Biểu Điện Tử (App)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #a855f7;
+            --secondary: #ec4899;
+            --dark-bg: #0f0c29;
+            --mid-bg: #302b63;
+            --light-bg: #24243e;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), var(--mid-bg), var(--light-bg));
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Đồ hoạ trang trí SVG Background */
+        .decor-svg {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.4;
+            pointer-events: none;
+            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5));
+        }
+
+        .flower-1 {
+            top: -10%; left: -10%;
+            width: 50vw; max-width: 600px;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .flower-2 {
+            bottom: -10%; right: -10%;
+            width: 40vw; max-width: 500px;
+            animation: float 12s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card {
+            background: rgba(20, 15, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(168, 85, 247, 0.6);
+            transform: translateX(5px);
+            box-shadow: -5px 5px 20px rgba(168, 85, 247, 0.15);
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox input {
+            display: none;
+        }
+
+        .checkmark {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #a855f7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-checkbox input:checked + .checkmark {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-color: transparent;
+        }
+
+        .checkmark svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 24;
+            stroke-dashoffset: 24;
+            transition: stroke-dashoffset 0.4s ease;
+        }
+
+        .custom-checkbox input:checked + .checkmark svg {
+            stroke-dashoffset: 0;
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to right, #d8b4fe, #f9a8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Modal Animation */
+        #day-modal, #summary-modal {
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #day-modal.hidden-modal, #summary-modal.hidden-modal {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.8); }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(236, 72, 153, 0.5); border-radius: 3px;}
+
+        /* Progress Bar transition */
+        #progress-fill { transition: width 0.5s ease-out; }
+
+        /* Hiệu ứng ẩn mượt mà khi tick */
+        .hiding-card {
+            animation: slideOutUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes slideOutUp {
+            0% { opacity: 1; transform: scale(1); max-height: 150px; margin-bottom: 1rem; padding: 1rem; border-width: 1px;}
+            40% { opacity: 0; transform: scale(0.95); max-height: 150px; margin-bottom: 1rem; padding: 1rem; border-width: 1px;}
+            100% { opacity: 0; transform: scale(0.9); max-height: 0; margin-bottom: 0; padding: 0; border-width: 0; overflow: hidden; }
+        }
+
+        /* Trạng thái ẩn ngay lập tức (khi load lại trang) */
+        .hidden-instantly {
+            opacity: 0 !important;
+            max-height: 0 !important;
+            margin-bottom: 0 !important;
+            padding: 0 !important;
+            border-width: 0 !important;
+            overflow: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* Hiệu ứng xuất hiện trong mây khói */
+        .smoke-appear {
+            animation: smokeIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            position: relative;
+        }
+
+        @keyframes smokeIn {
+            0% { opacity: 0; max-height: 0; margin-bottom: 0; padding: 0; transform: translateY(-20px) scale(0.9); filter: blur(10px); }
+            50% { max-height: 150px; margin-bottom: 1rem; padding: 1rem; filter: blur(5px); opacity: 0.5; }
+            100% { opacity: 1; max-height: 150px; margin-bottom: 1rem; padding: 1rem; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        .smoke-appear::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.6) 0%, transparent 70%);
+            opacity: 0;
+            animation: smokePoof 0.7s ease-out forwards;
+            pointer-events: none;
+            border-radius: inherit;
+            z-index: 10;
+        }
+
+        @keyframes smokePoof {
+            0% { transform: scale(0.8); opacity: 0.8; filter: blur(8px); }
+            100% { transform: scale(1.5); opacity: 0; filter: blur(20px); }
+        }
+
+        /* Nút Undo */
+        #undo-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #undo-btn.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="relative antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Đồ hoạ SVG Hoa văn trang trí -->
+    <svg class="decor-svg flower-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.6" />
+                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:0.1" />
+            </linearGradient>
+        </defs>
+        <path fill="url(#grad1)" d="M45.7,-76.3C58.9,-69.3,68.9,-54.8,77.7,-40.4C86.5,-26,94.1,-11.7,91.8,1.7C89.5,15.2,77.3,27.8,66.8,39.6C56.3,51.4,47.4,62.3,35.3,69.5C23.2,76.6,7.8,80,-7.7,78.7C-23.2,77.4,-38.7,71.4,-50.2,61.4C-61.7,51.4,-69.2,37.3,-75.4,22.4C-81.6,7.6,-86.5,-8,-81.9,-21.2C-77.3,-34.4,-63.2,-45.2,-49.6,-52.1C-36,-59,-22.9,-62,-8.5,-64.1C5.9,-66.1,20.3,-67.2,32.4,-73.2Z" transform="translate(100 100)" />
+        <path fill="none" stroke="rgba(236, 72, 153, 0.3)" stroke-width="2" d="M30,-45C45,-30,50,-10,40,15C30,40,5,55,-15,45C-35,35,-45,10,-35,-10C-25,-30,-5,-45,10,-50" transform="translate(100 100)" />
+    </svg>
+
+    <svg class="decor-svg flower-2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="grad2" x1="100%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
+                <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.1" />
+            </linearGradient>
+        </defs>
+        <path fill="url(#grad2)" d="M51,-68.8C64.6,-59.5,73,-43.3,77.5,-26.6C82,-9.9,82.5,7.3,76.8,22.7C71.1,38.2,59.1,51.9,44.5,60.8C29.9,69.7,12.7,73.8,-3.8,79.2C-20.3,84.5,-36.1,91.1,-48.5,83.9C-60.8,76.6,-69.7,55.4,-75.3,34.9C-80.9,14.4,-83.1,-5.5,-76.4,-21.7C-69.7,-37.8,-54.1,-50.2,-39.3,-59C-24.5,-67.8,-12.3,-73,2.4,-76.3C17.1,-79.6,37.3,-78.1,51,-68.8Z" transform="translate(100 100) scale(1.1)" />
+        <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="1" stroke-dasharray="5 5"/>
+    </svg>
+
+    <!-- Màn hình Loading khi tải dữ liệu Cloud -->
+    <div id="loading-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500">
+        <svg class="w-16 h-16 text-purple-500 animate-spin mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-purple-200 font-medium animate-pulse tracking-wide">Đang đồng bộ dữ liệu của bạn...</p>
+    </div>
+
+    <!-- Modal chọn ngày ban đầu -->
+    <div id="day-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden-modal">
+        <div class="glass w-[90%] max-w-lg p-8 rounded-3xl text-center transform scale-100 transition-transform shadow-[0_0_40px_rgba(168,85,247,0.15)]">
+            <h2 class="text-3xl font-bold mb-2 text-gradient">Xin chào! 👋</h2>
+            <p class="text-purple-200 mb-8 font-light">Hôm nay là thứ mấy? Hãy chọn để nạp năng lượng cho ngày mới nhé.</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <button onclick="selectDay('T2')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 2</button>
+                <button onclick="selectDay('T3')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 3</button>
+                <button onclick="selectDay('T4')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 4</button>
+                <button onclick="selectDay('T5')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 5</button>
+                <button onclick="selectDay('T6')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 6</button>
+                <button onclick="selectDay('T7')" class="glass hover:bg-purple-500/30 text-white py-3 px-4 rounded-xl font-medium transition-colors border border-purple-400/30 hover:border-purple-400">Thứ 7</button>
+                <button onclick="selectDay('CN')" class="glass hover:bg-pink-500/30 text-pink-300 py-3 px-4 rounded-xl font-bold transition-colors border border-pink-400/30 hover:border-pink-400 md:col-span-3">Chủ Nhật</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pháo hoa Canvas -->
+    <canvas id="fireworks" class="fixed inset-0 z-40 pointer-events-none hidden"></canvas>
+
+    <!-- Modal Tổng Kết -->
+    <div id="summary-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md hidden-modal">
+        <div class="glass w-[90%] max-w-lg p-8 rounded-3xl text-center transform scale-100 transition-transform relative border border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.2)]">
+            <button onclick="closeSummary()" class="absolute top-5 right-5 text-purple-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Tổng Kết Ngày</h2>
+            <div id="summary-inner-content"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="max-w-4xl mx-auto p-4 md:p-8 hidden opacity-0 transition-opacity duration-1000">
+        
+        <!-- Header & Progress -->
+        <div class="glass p-6 md:p-8 rounded-3xl mb-8 relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <div class="absolute top-0 left-0 w-full h-1 bg-white/10"></div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-300 mb-2">
+                        TKB Tiêu Điểm
+                    </h1>
+                    <p id="current-day-label" class="text-purple-200 font-medium text-lg flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse drop-shadow-[0_0_5px_rgba(74,222,128,0.8)]"></span>
+                        Lịch trình hôm nay: <span class="font-bold text-white" id="day-text">Thứ 2</span>
+                    </p>
+                </div>
+                <button onclick="openModal()" class="mt-4 md:mt-0 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-sm text-purple-200 hover:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Đổi ngày
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm font-medium text-purple-200">
+                    <span>Tiến độ hoàn thành</span>
+                    <span id="progress-text">0%</span>
+                </div>
+                <div class="w-full h-3 bg-black/40 rounded-full overflow-hidden border border-white/10 shadow-inner">
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 w-0 relative">
+                        <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                            <div class="w-[200%] h-full bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[slide_1s_linear_infinite]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task List Container -->
+        <div id="schedule-list" class="pb-10">
+            <!-- JS will inject cards here -->
+        </div>
+
+        <!-- Nút Kết Thúc Ngày -->
+        <div class="flex justify-center pb-10 mt-8">
+            <button onclick="endDay()" class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl font-bold text-white text-lg shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(236,72,153,0.6)] hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-white/20">
+                <span class="relative z-10 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01"></path></svg>
+                    Kết Thúc Ngày
+                </span>
+                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+            </button>
+        </div>
+
+        <!-- Nút Hoàn Tác (Undo) Nổi -->
+        <button id="undo-btn" onclick="undoLastAction()" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 border border-purple-500/30 text-white px-4 py-3 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:scale-105 transition-all">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+            <span class="font-medium text-sm">Hoàn tác</span>
+        </button>
+
+    </div>
+
+    <!-- Script Tích hợp Firebase & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Khởi tạo Firebase App
+        let app, auth, db, appId;
+        try {
+            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        } catch (e) {
+            console.warn("Không tìm thấy cấu hình Cloud, môi trường không hỗ trợ lưu trữ.");
+        }
+
+        let currentUser = null;
+
+        // --- DỮ LIỆU THỜI KHÓA BIỂU ---
+        const getMonSatSchedule = (diffSubject) => [
+            { time: "05:30 - 05:40", name: "Khởi động, Face yoga", note: "Thức tỉnh cơ thể" },
+            { time: "05:40 - 06:25", name: "Anki (Tiết 1)", note: "Ôn tập" },
+            { time: "06:25 - 06:30", name: "Giải lao", note: "5 phút" },
+            { time: "06:30 - 08:15", name: "Writing + Từ vựng", note: "Tập trung cao độ" },
+            { time: "08:15 - 08:25", name: "Listening (Cử 1)", note: "Kèm 10p nghỉ ngơi" },
+            { time: "08:25 - 09:40", name: diffSubject, note: "Ca luân phiên" },
+            { time: "09:40 - 09:45", name: "Giải lao", note: "5 phút" },
+            { time: "09:45 - 11:45", name: "Toán (Ca 1)", note: "Luyện câu dễ" },
+            { time: "11:45 - 13:45", name: "Ăn trưa & Ngủ trưa", note: "Hồi phục năng lượng" },
+            { time: "13:45 - 14:30", name: "Anki (Tiết 2)", note: "Học từ mới" },
+            { time: "14:30 - 14:35", name: "Giải lao", note: "5 phút" },
+            { time: "14:35 - 16:20", name: "Luyện đề HSG", note: "Nghiêm túc làm bài" },
+            { time: "16:20 - 16:30", name: "Listening (Cử 2)", note: "Kèm 10p nghỉ ngơi" },
+            { time: "16:30 - 18:00", name: "Sách Bổ Trợ", note: "Nghiên cứu thêm" },
+            { time: "18:00 - 19:30", name: "Thể thao, Chiều tà", note: "Xả stress & Ăn tối" },
+            { time: "19:30 - 19:55", name: "Học MOS", note: "Kỹ năng tin học" },
+            { time: "19:55 - 20:05", name: "Listening (Cử 3)", note: "Kèm 10p nghỉ ngơi" },
+            { time: "20:05 - 21:50", name: "Speaking (4 Topics)", note: "Luyện nói to rõ ràng" },
+            { time: "21:50 - 22:00", name: "Giải lao mắt", note: "Nhìn xa 20 feet" },
+            { time: "22:00 - 00:00", name: "Toán (Ca 2)", note: "Tư duy câu khó" }
+        ];
+
+        const scheduleData = {
+            "T2": getMonSatSchedule("Reading (Full Test)"),
+            "T3": getMonSatSchedule("Tăng cường Writing"),
+            "T4": getMonSatSchedule("Tăng cường Speaking"),
+            "T5": getMonSatSchedule("Reading (Phân tích)"),
+            "T6": getMonSatSchedule("Tăng cường Writing"),
+            "T7": getMonSatSchedule("Tăng cường Speaking"),
+            "CN": [
+                { time: "05:30 - 05:40", name: "Thức dậy", note: "Hít thở không khí lạnh" },
+                { time: "05:40 - 06:25", name: "Anki", note: "Ôn tập tổng hợp tuần" },
+                { time: "06:25 - 06:30", name: "Giải lao vươn vai", note: "5 phút" },
+                { time: "06:30 - 07:00", name: "Listening", note: "Làm Full Test (30p)" },
+                { time: "07:00 - 07:15", name: "Dò đáp án", note: "Chữa chi tiết Listening" },
+                { time: "07:15 - 07:25", name: "Nghỉ ngơi", note: "Rời khỏi bàn học" },
+                { time: "07:25 - 09:25", name: "Speaking (2h)", note: "Ôn TẤT CẢ câu hỏi & từ vựng tuần" },
+                { time: "09:25 - 09:35", name: "Giải lao", note: "10 phút" },
+                { time: "09:35 - 11:45", name: "Học tự do / Xem lỗi", note: "Lỗi HSG, KT Y khoa, Khoa học" },
+                { time: "11:45 - 13:45", name: "Ăn trưa & Ngủ trưa", note: "Bắt buộc!" },
+                { time: "13:45 - 14:30", name: "Anki", note: "Lướt thẻ nhẹ nhàng" },
+                { time: "14:30 - 14:40", name: "Nghe Podcast", note: "Thụ động" },
+                { time: "14:40 - 16:00", name: "Ôn Sách bổ trợ", note: "Chuẩn bị Toán/MOS cho Thứ 2" },
+                { time: "16:00 - Tối", name: "OFF HOÀN TOÀN 🎉", note: "Thể thao, hoàng hôn, gia đình, ngủ sớm" }
+            ]
+        };
+
+        const dayNames = {
+            "T2": "Thứ 2", "T3": "Thứ 3", "T4": "Thứ 4", 
+            "T5": "Thứ 5", "T6": "Thứ 6", "T7": "Thứ 7", "CN": "Chủ Nhật"
+        };
+
+        const quotes = [
+            "Công việc quan trọng, nhưng sức khỏe của bạn còn quan trọng hơn. Hãy đi ngủ một giấc thật ngon nhé!",
+            "Bạn đã nỗ lực hết sức rồi. Đừng thức quá khuya, hãy để cơ thể được nghỉ ngơi và hồi phục.",
+            "Kỷ luật là tốt, nhưng biết điểm dừng để nạp lại năng lượng mới là khôn ngoan. Chúc bạn ngủ ngon!",
+            "Một ngày dài đã khép lại. Hãy thả lỏng tâm trí, hít thở sâu và vỗ về giấc ngủ của bạn.",
+            "Những mục tiêu lớn cần một sức khoẻ bền bỉ. Máy móc còn cần sạc pin, ngần ngại gì mà không nghỉ ngơi sớm thôi nào!"
+        ];
+
+        // --- TRẠNG THÁI ỨNG DỤNG ---
+        let currentDayKey = null;
+        let currentTasks = [];
+        let completedCount = 0;
+        let taskStatus = []; 
+        let undoStack = []; 
+
+        // Hàm tính ngày logic (Mốc reset là 3h sáng)
+        function getLogicalDate() {
+            const now = new Date();
+            if (now.getHours() < 3) {
+                // Nếu trước 3h sáng, tính là ngày hôm qua
+                now.setDate(now.getDate() - 1);
+            }
+            return now.toDateString();
+        }
+
+        // --- CLOUD STORAGE FUNCTIONS ---
+        async function saveState() {
+            if (!currentUser || !db) return;
+            const state = {
+                currentDayKey,
+                taskStatus,
+                undoStack,
+                lastLogicalDate: getLogicalDate()
+            };
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedule_state', 'current');
+            try {
+                await setDoc(docRef, state);
+            } catch (e) {
+                console.error("Lỗi khi lưu tiến độ:", e);
+            }
+        }
+
+        async function loadState() {
+            if (!currentUser || !db) {
+                fallbackToNewDay();
+                return;
+            }
+            
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedule_state', 'current');
+            try {
+                const docSnap = await getDoc(docRef);
+                const currentLogicalDate = getLogicalDate();
+
+                if (docSnap.exists()) {
+                    const state = docSnap.data();
+                    
+                    // Kiểm tra nếu cùng một "ngày logic" (cùng ngày hoặc chưa qua 3h sáng hôm sau)
+                    if (state.lastLogicalDate === currentLogicalDate && state.currentDayKey) {
+                        currentDayKey = state.currentDayKey;
+                        taskStatus = state.taskStatus || [];
+                        undoStack = state.undoStack || [];
+                        currentTasks = scheduleData[currentDayKey];
+                        completedCount = taskStatus.filter(Boolean).length;
+                        
+                        restoreUI();
+                        return;
+                    }
+                }
+                // Nếu qua ngày mới (qua 3h sáng) hoặc lần đầu dùng
+                fallbackToNewDay();
+
+            } catch(e) {
+                console.error("Lỗi khi tải tiến độ:", e);
+                fallbackToNewDay();
+            }
+        }
+
+        function fallbackToNewDay() {
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('day-modal').classList.remove('hidden-modal');
+        }
+
+        // --- AUTHENTICATION ---
+        const initAuth = async () => {
+            if (!auth) {
+                fallbackToNewDay();
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(e) {
+                console.error("Auth error", e);
+                fallbackToNewDay();
+            }
+        };
+
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadState(); // Bắt đầu tải dữ liệu sau khi đăng nhập ẩn danh
+                }
+            });
+            initAuth();
+        } else {
+            // Môi trường không có Firebase
+            setTimeout(fallbackToNewDay, 1000);
+        }
+
+
+        // --- UI & LOGIC XỬ LÝ (Gắn vào window để gọi từ HTML) ---
+        
+        window.openModal = function() {
+            document.getElementById('day-modal').classList.remove('hidden-modal');
+        };
+
+        window.selectDay = async function(dayKey) {
+            document.getElementById('day-modal').classList.add('hidden-modal');
+            
+            currentDayKey = dayKey;
+            currentTasks = scheduleData[dayKey];
+            taskStatus = new Array(currentTasks.length).fill(false);
+            completedCount = 0;
+            undoStack = [];
+            
+            restoreUI();
+            await saveState(); // Lưu ngay ngày mới chọn
+        };
+
+        function restoreUI() {
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('day-modal').classList.add('hidden-modal');
+            
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.remove('hidden');
+            setTimeout(() => {
+                mainContent.classList.add('opacity-100');
+            }, 100);
+
+            document.getElementById('day-text').innerText = dayNames[currentDayKey];
+            if(currentDayKey === 'CN') {
+                document.getElementById('day-text').className = "font-bold text-pink-400";
+            } else {
+                document.getElementById('day-text').className = "font-bold text-white";
+            }
+
+            renderSchedule();
+            updateProgress();
+
+            if (undoStack.length > 0) {
+                document.getElementById('undo-btn').classList.add('show');
+            } else {
+                document.getElementById('undo-btn').classList.remove('show');
+            }
+        }
+
+        function renderSchedule() {
+            const listContainer = document.getElementById('schedule-list');
+            listContainer.innerHTML = ''; 
+
+            currentTasks.forEach((task, index) => {
+                const isCompleted = taskStatus[index];
+                const card = document.createElement('div');
+                
+                // Nếu đã hoàn thành (tải từ Cloud), áp dụng class ẩn lập tức
+                card.className = `glass-card mb-4 rounded-2xl p-4 flex items-center justify-between gap-4 ${isCompleted ? 'hidden-instantly' : ''}`;
+                card.id = `card-${index}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-5 flex-1 min-w-0">
+                        <label class="custom-checkbox shrink-0">
+                            <input type="checkbox" onchange="toggleTask(${index}, this.checked)" ${isCompleted ? 'checked' : ''}>
+                            <div class="checkmark">
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </label>
+                        <div class="flex-1 min-w-0">
+                            <div class="time-badge inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold tracking-wider mb-1 transition-colors">
+                                ${task.time}
+                            </div>
+                            <h3 class="task-text text-lg font-bold text-white truncate transition-all duration-300">${task.name}</h3>
+                            <p class="text-sm text-purple-200/60 truncate mt-0.5">${task.note}</p>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        window.toggleTask = function(index, isChecked) {
+            const card = document.getElementById(`card-${index}`);
+            // Chặn click lặp khi đang chạy hiệu ứng hoặc đã ẩn
+            if(card.classList.contains('hiding-card') || card.classList.contains('hidden-instantly')) return; 
+
+            taskStatus[index] = isChecked;
+            if (isChecked) {
+                completedCount++;
+                undoStack.push(index);
+                document.getElementById('undo-btn').classList.add('show');
+
+                card.classList.add('hiding-card');
+                card.classList.remove('smoke-appear');
+                
+                updateProgress();
+                saveState(); // Lưu Cloud
+            }
+        };
+
+        window.undoLastAction = function() {
+            if (undoStack.length === 0) return;
+
+            const lastIndex = undoStack.pop();
+            const card = document.getElementById(`card-${lastIndex}`);
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            
+            taskStatus[lastIndex] = false;
+            if(checkbox) checkbox.checked = false;
+            completedCount--;
+
+            card.classList.remove('hiding-card', 'hidden-instantly');
+            void card.offsetWidth; 
+            card.classList.add('smoke-appear');
+
+            if (undoStack.length === 0) {
+                document.getElementById('undo-btn').classList.remove('show');
+            }
+
+            updateProgress();
+            saveState(); // Lưu Cloud
+
+            setTimeout(() => {
+                if(!taskStatus[lastIndex]) {
+                    card.classList.remove('smoke-appear');
+                }
+            }, 750);
+        };
+
+        // Phím tắt Ctrl+Z
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+                window.undoLastAction();
+            }
+        });
+
+        function updateProgress() {
+            const total = currentTasks.length;
+            const percentage = total === 0 ? 0 : Math.round((completedCount / total) * 100);
+            
+            document.getElementById('progress-text').innerText = `${percentage}% (${completedCount}/${total})`;
+            document.getElementById('progress-fill').style.width = `${percentage}%`;
+
+            if (percentage === 100 && total > 0) {
+                startFireworks(3000);
+            }
+        }
+
+        // --- TỔNG KẾT & PHÁO HOA ---
+
+        window.endDay = function() {
+            const uncompleted = currentTasks.filter((task, index) => !taskStatus[index]);
+            const summaryContent = document.getElementById('summary-inner-content');
+            let html = '';
+            
+            if (uncompleted.length === 0) {
+                html += `<div class="mb-6 relative z-10"><svg class="w-20 h-20 mx-auto text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                         <h3 class="text-2xl font-bold text-green-400 mb-2">Tuyệt Đỉnh!</h3>
+                         <p class="text-gray-200">Bạn đã hoàn thành 100% kế hoạch ngày hôm nay. Thật đáng tự hào!</p></div>`;
+            } else {
+                html += `<h3 class="text-xl font-bold text-pink-400 mb-4 relative z-10">Mục tiêu chưa hoàn thành:</h3>
+                         <div class="text-left bg-black/40 rounded-xl p-4 max-h-[35vh] overflow-y-auto mb-6 border border-white/10 shadow-inner custom-scrollbar relative z-10">
+                            <ul class="space-y-3">`;
+                uncompleted.forEach(t => {
+                    html += `<li class="flex items-start gap-3">
+                                <span class="mt-1 text-pink-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></span>
+                                <div>
+                                    <p class="font-semibold text-white">${t.name}</p>
+                                    <p class="text-xs text-purple-300 opacity-80">${t.time}</p>
+                                </div>
+                             </li>`;
+                });
+                html += `   </ul>
+                         </div>`;
+            }
+
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            html += `<div class="p-5 bg-gradient-to-br from-purple-900/50 to-pink-900/30 rounded-xl border border-purple-500/30 relative overflow-hidden z-10">
+                        <div class="absolute -top-4 -left-4 text-purple-500/20 text-6xl font-serif">"</div>
+                        <p class="italic text-purple-100 relative z-10 leading-relaxed font-light">${randomQuote}</p>
+                     </div>`;
+            
+            summaryContent.innerHTML = html;
+            document.getElementById('summary-modal').classList.remove('hidden-modal');
+            startFireworks();
+        };
+
+        window.closeSummary = function() {
+            document.getElementById('summary-modal').classList.add('hidden-modal');
+            stopFireworks();
+        };
+
+        // --- CODE PHÁO HOA CANVAS ---
+        const fireworksCanvas = document.getElementById('fireworks');
+        const ctx = fireworksCanvas.getContext('2d');
+        let fwWidth, fwHeight;
+        let particles = [];
+        let animationId = null;
+        let autoShootInterval = null;
+
+        function resizeCanvas() {
+            fwWidth = window.innerWidth;
+            fwHeight = window.innerHeight;
+            fireworksCanvas.width = fwWidth;
+            fireworksCanvas.height = fwHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 3;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.friction = 0.95;
+                this.gravity = 0.15;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.01;
+                this.history = [];
+            }
+            update() {
+                this.history.push({x: this.x, y: this.y});
+                if(this.history.length > 8) this.history.shift();
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                if(this.history.length > 0) {
+                    ctx.moveTo(this.history[0].x, this.history[0].y);
+                } else {
+                    ctx.moveTo(this.x, this.y);
+                }
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = `hsla(${this.color}, 100%, 65%, ${Math.max(0, this.alpha)})`;
+                ctx.lineWidth = 3.5;
+                ctx.lineCap = "round";
+                ctx.stroke();
+            }
+        }
+
+        function createExplosion(x, y) {
+            const baseColor = Math.random() * 360;
+            for (let i = 0; i < 70; i++) {
+                particles.push(new Particle(x, y, baseColor + Math.random()*50-25));
+            }
+        }
+
+        function animateFireworks() {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(0, 0, fwWidth, fwHeight);
+            
+            ctx.globalCompositeOperation = 'lighter';
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            animationId = requestAnimationFrame(animateFireworks);
+        }
+
+        function startFireworks(duration = 0) {
+            fireworksCanvas.classList.remove('hidden');
+            resizeCanvas();
+            if(!animationId) animateFireworks();
+            
+            const shoot = () => {
+                const x = fwWidth * 0.2 + Math.random() * (fwWidth * 0.6);
+                const y = fwHeight * 0.1 + Math.random() * (fwHeight * 0.4);
+                createExplosion(x, y);
+            };
+            
+            shoot(); shoot();
+            
+            clearInterval(autoShootInterval);
+            autoShootInterval = setInterval(shoot, 800);
+
+            if (duration > 0) {
+                setTimeout(stopFireworks, duration);
+            }
+        }
+
+        function stopFireworks() {
+            clearInterval(autoShootInterval);
+            setTimeout(() => {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                ctx.clearRect(0, 0, fwWidth, fwHeight);
+                fireworksCanvas.classList.add('hidden');
+                particles = [];
+            }, 2000);
+        }
+
+    </script>
+    <style>
+        /* Animation cho stripe của progress bar */
+        @keyframes slide {
+            from { background-position: 0 0; }
+            to { background-position: 40px 0; }
+        }
+    </style>
+</body>
+</html>
