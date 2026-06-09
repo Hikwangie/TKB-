@@ -598,62 +598,35 @@
             saveToLocalStorage();
         };
 
-        // --- XỬ LÝ SWIPE (VUỐT TRÁI ĐỂ XOÁ) ---
-        let swipingIndex = null;
-        let swipeStartX = 0;
-
-        window.handleSwipeStart = function(e, index) {
-            // Bỏ qua nếu chạm vào icon kéo thả hoặc ô checkbox
-            if(e.target.closest('.drag-handle') || e.target.closest('.custom-checkbox')) return;
-            
-            swipingIndex = index;
-            swipeStartX = e.touches ? e.touches[0].clientX : e.clientX;
+        // --- XỬ LÝ MỞ/ĐÓNG NÚT HÀNH ĐỘNG (BẰNG MŨI TÊN) ---
+        window.toggleActions = function(index) {
             const el = document.getElementById(`card-content-${index}`);
-            if(el) el.classList.add('swiping'); // Tắt mượt để di theo tay
-
-            // Hiện cụm nút khi bắt đầu vuốt thẻ
             const actionBg = document.getElementById(`action-bg-${index}`);
-            if (actionBg) actionBg.classList.remove('opacity-0');
-        };
+            const arrowBtn = document.getElementById(`arrow-btn-${index}`);
 
-        window.handleSwipeMove = function(e, index) {
-            if (swipingIndex !== index) return;
-            const currentX = e.touches ? e.touches[0].clientX : e.clientX;
-            const diff = currentX - swipeStartX;
-            
-            // Chỉ cho phép vuốt sang trái (diff âm), max lộ ra 160px (chứa nút Sửa + Xoá)
-            if (diff < 0) {
-                const el = document.getElementById(`card-content-${index}`);
-                const transformX = Math.max(diff, -160); 
-                el.style.transform = `translateX(${transformX}px)`;
-            }
-        };
+            if (!el || !actionBg || !arrowBtn) return;
 
-        window.handleSwipeEnd = function(e, index) {
-            if (swipingIndex !== index) return;
-            const el = document.getElementById(`card-content-${index}`);
-            if(!el) return;
-            el.classList.remove('swiping');
-            
-            const currentX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-            const diff = currentX - swipeStartX;
-            
-            // Bật lại mượt
-            el.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            
-            // Nếu kéo lố qua -70px thì mở rộng khung chứa 2 nút, ngược lại tự rụt về
-            if (diff < -70) {
-                el.style.transform = `translateX(-160px)`;
-            } else {
+            const isOpen = el.classList.contains('actions-open');
+
+            if (isOpen) {
+                // Đóng thẻ lại
+                el.classList.remove('actions-open');
                 el.style.transform = `translateX(0px)`;
+                arrowBtn.querySelector('svg').style.transform = 'rotate(0deg)';
                 
-                // Ẩn cụm nút sau khi thẻ rụt về hoàn toàn (0.3s khớp với thời gian transition)
+                // Ẩn cụm nút sau khi thẻ rụt về hoàn toàn
                 setTimeout(() => {
-                    const actionBg = document.getElementById(`action-bg-${index}`);
-                    if (actionBg) actionBg.classList.add('opacity-0');
+                    if (!el.classList.contains('actions-open')) {
+                        actionBg.classList.add('opacity-0');
+                    }
                 }, 300);
+            } else {
+                // Mở thẻ ra
+                el.classList.add('actions-open');
+                actionBg.classList.remove('opacity-0');
+                el.style.transform = `translateX(-160px)`;
+                arrowBtn.querySelector('svg').style.transform = 'rotate(180deg)';
             }
-            swipingIndex = null;
         };
 
         window.deleteTask = function(index) {
@@ -704,19 +677,15 @@
                     </div>
                     
                     <!-- Nội dung thẻ trượt được -->
-                    <div class="glass-card swipe-content relative z-10 flex items-center justify-between gap-3 p-4 rounded-2xl w-full" 
-                         id="card-content-${index}"
-                         onpointerdown="handleSwipeStart(event, ${index})" 
-                         onpointermove="handleSwipeMove(event, ${index})" 
-                         onpointerup="handleSwipeEnd(event, ${index})"
-                         onpointercancel="handleSwipeEnd(event, ${index})">
+                    <div class="glass-card swipe-content relative z-10 flex items-center gap-3 p-4 rounded-2xl w-full" 
+                         id="card-content-${index}">
                         
                         <!-- Icon Kéo thả Handle -->
-                        <div class="drag-handle text-purple-300/40 hover:text-purple-300 p-1 -ml-1 transition-colors">
+                        <div class="drag-handle text-purple-300/40 hover:text-purple-300 p-1 -ml-1 transition-colors shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                         </div>
 
-                        <div class="flex items-center gap-4 flex-1 min-w-0 pointer-events-auto">
+                        <div class="flex items-center gap-4 flex-1 min-w-0">
                             <label class="custom-checkbox shrink-0">
                                 <input type="checkbox" onchange="toggleTask(${index}, this.checked)" ${isCompleted ? 'checked' : ''}>
                                 <div class="checkmark">
@@ -731,6 +700,13 @@
                                 <p class="text-sm text-purple-200/60 truncate mt-0.5">${task.note}</p>
                             </div>
                         </div>
+
+                        <!-- Mũi tên Toggle -->
+                        <button onclick="toggleActions(${index})" id="arrow-btn-${index}" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 text-purple-200 hover:bg-white/20 hover:text-white transition-all z-20">
+                            <svg class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
                     </div>
                 `;
                 listContainer.appendChild(wrapper);
@@ -742,7 +718,9 @@
             }
             window.scheduleSortable = new Sortable(listContainer, {
                 handle: '.drag-handle', // Chỉ kéo khi chạm icon 3 gạch
-                animation: 200,         // Hoạt ảnh đi xuống 1 bậc cực mượt
+                animation: 250,         // Hoạt ảnh đi xuống mượt hơn
+                delay: 150,             // Trễ 150ms để phân biệt với cuộn web (khắc phục lag)
+                delayOnTouchOnly: true, // Chỉ áp dụng độ trễ trên màn hình cảm ứng
                 ghostClass: 'sortable-ghost',
                 forceFallback: true,    // Hỗ trợ mobile hoàn hảo
                 fallbackClass: 'sortable-fallback',
@@ -858,9 +836,16 @@
             editingIndex = index;
             const task = currentTasks[index];
             
-            // Thu thẻ lại nếu nó đang bị kéo vuốt ngang
+            // Thu thẻ lại nếu nó đang mở
             const el = document.getElementById(`card-content-${index}`);
-            if(el) el.style.transform = `translateX(0px)`;
+            const arrowBtn = document.getElementById(`arrow-btn-${index}`);
+            if(el) {
+                el.classList.remove('actions-open');
+                el.style.transform = `translateX(0px)`;
+            }
+            if(arrowBtn) {
+                arrowBtn.querySelector('svg').style.transform = 'rotate(0deg)';
+            }
             
             // Ẩn nền chứa 2 nút đi khi đã bấm vào sửa
             const actionBg = document.getElementById(`action-bg-${index}`);
