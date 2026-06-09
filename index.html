@@ -212,7 +212,6 @@
 </head>
 <body class="relative antialiased selection:bg-purple-500 selection:text-white">
 
-    <!-- Đồ hoạ SVG Hoa văn trang trí -->
     <svg class="decor-svg flower-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -235,16 +234,6 @@
         <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="1" stroke-dasharray="5 5"/>
     </svg>
 
-    <!-- Màn hình Loading khi tải dữ liệu Cloud -->
-    <div id="loading-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500">
-        <svg class="w-16 h-16 text-purple-500 animate-spin mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="text-purple-200 font-medium animate-pulse tracking-wide">Đang đồng bộ dữ liệu của bạn...</p>
-    </div>
-
-    <!-- Modal chọn ngày ban đầu -->
     <div id="day-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden-modal">
         <div class="glass w-[90%] max-w-lg p-8 rounded-3xl text-center transform scale-100 transition-transform shadow-[0_0_40px_rgba(168,85,247,0.15)]">
             <h2 class="text-3xl font-bold mb-2 text-gradient">Xin chào! 👋</h2>
@@ -262,10 +251,8 @@
         </div>
     </div>
 
-    <!-- Pháo hoa Canvas -->
     <canvas id="fireworks" class="fixed inset-0 z-40 pointer-events-none hidden"></canvas>
 
-    <!-- Modal Tổng Kết -->
     <div id="summary-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md hidden-modal">
         <div class="glass w-[90%] max-w-lg p-8 rounded-3xl text-center transform scale-100 transition-transform relative border border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.2)]">
             <button onclick="closeSummary()" class="absolute top-5 right-5 text-purple-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-10">
@@ -276,10 +263,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div id="main-content" class="max-w-4xl mx-auto p-4 md:p-8 hidden opacity-0 transition-opacity duration-1000">
+    <div id="main-content" class="max-w-4xl mx-auto p-4 md:p-8 hidden opacity-0 transition-opacity duration-500">
         
-        <!-- Header & Progress -->
         <div class="glass p-6 md:p-8 rounded-3xl mb-8 relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
             <div class="absolute top-0 left-0 w-full h-1 bg-white/10"></div>
             
@@ -299,7 +284,6 @@
                 </button>
             </div>
 
-            <!-- Progress Bar -->
             <div class="space-y-2">
                 <div class="flex justify-between text-sm font-medium text-purple-200">
                     <span>Tiến độ hoàn thành</span>
@@ -315,12 +299,9 @@
             </div>
         </div>
 
-        <!-- Task List Container -->
         <div id="schedule-list" class="pb-10">
-            <!-- JS will inject cards here -->
-        </div>
+            </div>
 
-        <!-- Nút Kết Thúc Ngày -->
         <div class="flex justify-center pb-10 mt-8">
             <button onclick="endDay()" class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl font-bold text-white text-lg shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(236,72,153,0.6)] hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-white/20">
                 <span class="relative z-10 flex items-center gap-2">
@@ -331,7 +312,6 @@
             </button>
         </div>
 
-        <!-- Nút Hoàn Tác (Undo) Nổi -->
         <button id="undo-btn" onclick="undoLastAction()" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 border border-purple-500/30 text-white px-4 py-3 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:scale-105 transition-all">
             <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
             <span class="font-medium text-sm">Hoàn tác</span>
@@ -339,26 +319,7 @@
 
     </div>
 
-    <!-- Script Tích hợp Firebase & Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Khởi tạo Firebase App
-        let app, auth, db, appId;
-        try {
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        } catch (e) {
-            console.warn("Không tìm thấy cấu hình Cloud, môi trường không hỗ trợ lưu trữ.");
-        }
-
-        let currentUser = null;
-
+    <script>
         // --- DỮ LIỆU THỜI KHÓA BIỂU ---
         const getMonSatSchedule = (diffSubject) => [
             { time: "05:30 - 05:40", name: "Khởi động, Face yoga", note: "Thức tỉnh cơ thể" },
@@ -421,147 +382,65 @@
             "Những mục tiêu lớn cần một sức khoẻ bền bỉ. Máy móc còn cần sạc pin, ngần ngại gì mà không nghỉ ngơi sớm thôi nào!"
         ];
 
-        // --- TRẠNG THÁI ỨNG DỤNG ---
+        // --- TRẠNG THÁIỨNG DỤNG ---
         let currentDayKey = null;
         let currentTasks = [];
         let completedCount = 0;
         let taskStatus = []; 
         let undoStack = []; 
 
-        // Hàm tính ngày logic (Mốc reset là 3h sáng)
+        // Tính ngày logic (sau 3 giờ sáng mới coi là ngày mới)
         function getLogicalDate() {
             const now = new Date();
             if (now.getHours() < 3) {
-                // Nếu trước 3h sáng, tính là ngày hôm qua
                 now.setDate(now.getDate() - 1);
             }
             return now.toDateString();
         }
 
-        // --- CLOUD STORAGE FUNCTIONS ---
-        async function saveState() {
-            if (!currentUser || !db) return;
+        // --- HÀM LƯU / TẢI LOCALSTORAGE (MÁY CHỦ TẠI CHỖ) ---
+        function saveToLocalStorage() {
             const state = {
                 currentDayKey,
                 taskStatus,
                 undoStack,
                 lastLogicalDate: getLogicalDate()
             };
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedule_state', 'current');
-            try {
-                await setDoc(docRef, state);
-            } catch (e) {
-                console.error("Lỗi khi lưu tiến độ:", e);
-            }
+            localStorage.setItem('tkb_app_state', JSON.stringify(state));
         }
 
-        async function loadState() {
-            if (!currentUser || !db) {
-                fallbackToNewDay();
-                return;
-            }
-            
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedule_state', 'current');
-            try {
-                const docSnap = await getDoc(docRef);
-                const currentLogicalDate = getLogicalDate();
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('tkb_app_state');
+            const currentLogicalDate = getLogicalDate();
 
-                if (docSnap.exists()) {
-                    const state = docSnap.data();
+            if (savedData) {
+                const state = JSON.parse(savedData);
+                // Nếu vẫn thuộc ngày cũ (trước mốc 3h sáng hôm sau) thì khôi phục tiến độ cũ
+                if (state.lastLogicalDate === currentLogicalDate && state.currentDayKey) {
+                    currentDayKey = state.currentDayKey;
+                    taskStatus = state.taskStatus || [];
+                    undoStack = state.undoStack || [];
+                    currentTasks = scheduleData[currentDayKey];
+                    completedCount = taskStatus.filter(Boolean).length;
                     
-                    // Kiểm tra nếu cùng một "ngày logic" (cùng ngày hoặc chưa qua 3h sáng hôm sau)
-                    if (state.lastLogicalDate === currentLogicalDate && state.currentDayKey) {
-                        currentDayKey = state.currentDayKey;
-                        taskStatus = state.taskStatus || [];
-                        undoStack = state.undoStack || [];
-                        currentTasks = scheduleData[currentDayKey];
-                        completedCount = taskStatus.filter(Boolean).length;
-                        
-                        restoreUI();
-                        return;
-                    }
+                    restoreUI();
+                    return;
                 }
-                // Nếu qua ngày mới (qua 3h sáng) hoặc lần đầu dùng
-                fallbackToNewDay();
-
-            } catch(e) {
-                console.error("Lỗi khi tải tiến độ:", e);
-                fallbackToNewDay();
             }
-        }
-
-        function fallbackToNewDay() {
-            document.getElementById('loading-screen').classList.add('hidden');
+            // Nếu qua ngày mới (sau 3h sáng) hoặc lần đầu mở app, dọn sạch dữ liệu cũ và hiện bảng chọn thứ
+            localStorage.removeItem('tkb_app_state');
             document.getElementById('day-modal').classList.remove('hidden-modal');
         }
-
-        // --- AUTHENTICATION ---
-        const initAuth = async () => {
-            if (!auth) {
-                fallbackToNewDay();
-                return;
-            }
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch(e) {
-                console.error("Auth error", e);
-                fallbackToNewDay();
-            }
-        };
-
-        if (auth) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    await loadState(); // Bắt đầu tải dữ liệu sau khi đăng nhập ẩn danh
-                }
-            });
-            initAuth();
-        } else {
-            // Môi trường không có Firebase
-            setTimeout(fallbackToNewDay, 1000);
-        }
-
-
-        // --- UI & LOGIC XỬ LÝ (Gắn vào window để gọi từ HTML) ---
-        
-        window.openModal = function() {
-            document.getElementById('day-modal').classList.remove('hidden-modal');
-        };
-
-        window.selectDay = async function(dayKey) {
-            document.getElementById('day-modal').classList.add('hidden-modal');
-            
-            currentDayKey = dayKey;
-            currentTasks = scheduleData[dayKey];
-            taskStatus = new Array(currentTasks.length).fill(false);
-            completedCount = 0;
-            undoStack = [];
-            
-            restoreUI();
-            await saveState(); // Lưu ngay ngày mới chọn
-        };
 
         function restoreUI() {
-            document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('day-modal').classList.add('hidden-modal');
             
             const mainContent = document.getElementById('main-content');
             mainContent.classList.remove('hidden');
-            setTimeout(() => {
-                mainContent.classList.add('opacity-100');
-            }, 100);
+            setTimeout(() => { mainContent.classList.add('opacity-100'); }, 50);
 
             document.getElementById('day-text').innerText = dayNames[currentDayKey];
-            if(currentDayKey === 'CN') {
-                document.getElementById('day-text').className = "font-bold text-pink-400";
-            } else {
-                document.getElementById('day-text').className = "font-bold text-white";
-            }
+            document.getElementById('day-text').className = currentDayKey === 'CN' ? "font-bold text-pink-400" : "font-bold text-white";
 
             renderSchedule();
             updateProgress();
@@ -573,6 +452,21 @@
             }
         }
 
+        window.openModal = function() {
+            document.getElementById('day-modal').classList.remove('hidden-modal');
+        };
+
+        window.selectDay = function(dayKey) {
+            currentDayKey = dayKey;
+            currentTasks = scheduleData[dayKey];
+            taskStatus = new Array(currentTasks.length).fill(false);
+            completedCount = 0;
+            undoStack = [];
+            
+            restoreUI();
+            saveToLocalStorage();
+        };
+
         function renderSchedule() {
             const listContainer = document.getElementById('schedule-list');
             listContainer.innerHTML = ''; 
@@ -580,8 +474,6 @@
             currentTasks.forEach((task, index) => {
                 const isCompleted = taskStatus[index];
                 const card = document.createElement('div');
-                
-                // Nếu đã hoàn thành (tải từ Cloud), áp dụng class ẩn lập tức
                 card.className = `glass-card mb-4 rounded-2xl p-4 flex items-center justify-between gap-4 ${isCompleted ? 'hidden-instantly' : ''}`;
                 card.id = `card-${index}`;
 
@@ -594,7 +486,7 @@
                             </div>
                         </label>
                         <div class="flex-1 min-w-0">
-                            <div class="time-badge inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold tracking-wider mb-1 transition-colors">
+                            <div class="time-badge inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold tracking-wider mb-1">
                                 ${task.time}
                             </div>
                             <h3 class="task-text text-lg font-bold text-white truncate transition-all duration-300">${task.name}</h3>
@@ -608,7 +500,6 @@
 
         window.toggleTask = function(index, isChecked) {
             const card = document.getElementById(`card-${index}`);
-            // Chặn click lặp khi đang chạy hiệu ứng hoặc đã ẩn
             if(card.classList.contains('hiding-card') || card.classList.contains('hidden-instantly')) return; 
 
             taskStatus[index] = isChecked;
@@ -621,7 +512,7 @@
                 card.classList.remove('smoke-appear');
                 
                 updateProgress();
-                saveState(); // Lưu Cloud
+                saveToLocalStorage();
             }
         };
 
@@ -645,12 +536,10 @@
             }
 
             updateProgress();
-            saveState(); // Lưu Cloud
+            saveToLocalStorage();
 
             setTimeout(() => {
-                if(!taskStatus[lastIndex]) {
-                    card.classList.remove('smoke-appear');
-                }
+                if(!taskStatus[lastIndex]) card.classList.remove('smoke-appear');
             }, 750);
         };
 
@@ -674,7 +563,6 @@
         }
 
         // --- TỔNG KẾT & PHÁO HOA ---
-
         window.endDay = function() {
             const uncompleted = currentTasks.filter((task, index) => !taskStatus[index]);
             const summaryContent = document.getElementById('summary-inner-content');
@@ -732,7 +620,6 @@
             fireworksCanvas.height = fwHeight;
         }
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         class Particle {
             constructor(x, y, color) {
@@ -760,11 +647,8 @@
             }
             draw(ctx) {
                 ctx.beginPath();
-                if(this.history.length > 0) {
-                    ctx.moveTo(this.history[0].x, this.history[0].y);
-                } else {
-                    ctx.moveTo(this.x, this.y);
-                }
+                if(this.history.length > 0) ctx.moveTo(this.history[0].x, this.history[0].y);
+                else ctx.moveTo(this.x, this.y);
                 ctx.lineTo(this.x, this.y);
                 ctx.strokeStyle = `hsla(${this.color}, 100%, 65%, ${Math.max(0, this.alpha)})`;
                 ctx.lineWidth = 3.5;
@@ -784,16 +668,13 @@
             ctx.globalCompositeOperation = 'destination-out';
             ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
             ctx.fillRect(0, 0, fwWidth, fwHeight);
-            
             ctx.globalCompositeOperation = 'lighter';
             
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.update();
                 p.draw(ctx);
-                if (p.alpha <= 0) {
-                    particles.splice(i, 1);
-                }
+                if (p.alpha <= 0) particles.splice(i, 1);
             }
             animationId = requestAnimationFrame(animateFireworks);
         }
@@ -808,33 +689,30 @@
                 const y = fwHeight * 0.1 + Math.random() * (fwHeight * 0.4);
                 createExplosion(x, y);
             };
-            
             shoot(); shoot();
-            
             clearInterval(autoShootInterval);
             autoShootInterval = setInterval(shoot, 800);
 
-            if (duration > 0) {
-                setTimeout(stopFireworks, duration);
-            }
+            if (duration > 0) setTimeout(stopFireworks, duration);
         }
 
         function stopFireworks() {
             clearInterval(autoShootInterval);
             setTimeout(() => {
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                    animationId = null;
-                }
+                if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
                 ctx.clearRect(0, 0, fwWidth, fwHeight);
                 fireworksCanvas.classList.add('hidden');
                 particles = [];
             }, 2000);
         }
 
+        // --- KHỞI CHẠY KHI MỞ TRANG ---
+        window.onload = function() {
+            resizeCanvas();
+            loadFromLocalStorage();
+        };
     </script>
     <style>
-        /* Animation cho stripe của progress bar */
         @keyframes slide {
             from { background-position: 0 0; }
             to { background-position: 40px 0; }
